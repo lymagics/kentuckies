@@ -1,0 +1,8 @@
+<div class="alert alert-light" role="alert">
+  <div class="Room">
+    {{ room.name }} 
+    <div style="float: right;">
+      <a class="btn btn-dark" href="{% url 'rooms:detail' pk=room.pk %}">Join</a>
+    </div>
+  </div>
+</div>

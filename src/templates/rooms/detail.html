@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-8">
+      <h3>{{ room.name }}</h3>
+      <div class="d-flex flex-wrap" id="members"></div>
+    </div>
+    <div class="col-md-4">
+      <img class="controls-icon" id="mic-icon" src="{% static 'icons/mic-off.svg' %}">
+      <img class="controls-icon" id="leave-icon" src="{% static 'icons/leave.svg' %}">
+    </div>
+  </div>
+{% endblock content %}
+
+{% block javascript %}
+  <script src="{% static 'agora-rtc.js' %}"></script>
+  <script>
+    const options = {
+      appId: `{{ APP_ID }}`,
+      channel: `{{ CHANNEL_NAME }}`,
+      token: `{{ TOKEN }}`,
+      uid: `{{ user.pk }}`,
+    };
+
+    let localTrack = null;
+    let remoteTracks = {};
+
+    let micMuted = true;
+
+    const members = document.getElementById('members');
+    const micIcon = document.getElementById('mic-icon');
+    const leaveIcon = document.getElementById('leave-icon');
+
+    let client;
+
+    const initRtc = async () => {
+      client = AgoraRTC.createClient({mode: 'rtc', codec: 'vp8'});
+
+      client.on('user-joined', onMemberJoined);
+      client.on('user-published', onMemberPublished);
+      client.on('user-left', onMemberLeft);
+
+      await client.join(options.appId, options.channel, options.token, options.uid);
+      localTrack = await AgoraRTC.createMicrophoneAudioTrack();
+      localTrack.setMuted(micMuted);
+      await client.publish(localTrack);
+
+      createMember(`{{ user.pk }}`, `{{ user.avatar_url }}`);
+      initVolumeIndicator();
+    };
+
+    const initVolumeIndicator = async () => {
+      AgoraRTC.setParameter('AUDIO_VOLUME_INDICATION_INTERVAL', 200);
+      client.enableAudioVolumeIndicator();
+
+      client.on('volume-indicator', volumes => {
+        volumes.forEach(volume => {
+          try {
+            let item = document.getElementsByClassName(`user-rtc-${volume.uid}`)[0];
+
+            if(volume.level >= 50) {
+              item.style.borderColor = '#00ff00';
+            }
+            else {
+              item.style.borderColor = '#fff';
+            }
+          }
+          catch(error) {
+            console.error(error);
+          }
+        });
+      });
+    };
+
+
+    const onMemberJoined = async (member) => {
+      const newMember = await getMember(member.uid);
+      createMember(newMember.uid, newMember.avatar_url);
+    };
+
+    const onMemberPublished = async (member, mediaType) => {
+      await client.subscribe(member, mediaType);
+
+      if(mediaType === 'audio') {
+        remoteTracks[member.uid] = [member.audioTrack];
+        member.audioTrack.play();
+      }
+    };
+
+    const onMemberLeft = async (member) => {
+      delete remoteTracks[member.uid];
+      document.getElementById(member.uid).remove();
+    };
+
+
+    const createMember = (uid, avatarUrl) => {
+      const newUser = `
+        <div id="${uid}" class="Avatar user-rtc-${uid}">
+          <img src="${avatarUrl}&s=128" id="user-${uid}"/>
+        </div>
+      `;
+      members.insertAdjacentHTML('beforeend', newUser);
+    };
+
+    const getMember = async (uid) => {
+      const response = await fetch(`/member/${uid}/`);
+      return await response.json(); 
+    };
+
+
+    const toggleMic = (ev) => {
+      if(micMuted) {
+        ev.target.src = `{% static 'icons/mic.svg' %}`;
+        micMuted = false;
+      }
+      else {
+        ev.target.src = `{% static 'icons/mic-off.svg' %}`;
+        micMuted = true;
+      }
+      localTrack.setMuted(micMuted);
+    };
+
+    const leaveRoom = async () => {
+      localTrack.stop();
+      localTrack.close();
+      client.unpublish();
+      client.leave();
+
+      window.open('/', '_self');
+    };
+
+    initRtc();
+
+    micIcon.addEventListener('click', toggleMic);
+    leaveIcon.addEventListener('click', leaveRoom);
+  </script>
+{% endblock javascript %}

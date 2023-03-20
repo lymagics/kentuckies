@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-4 mt-3">
+      <h3>Create new room</h3>
+      <form method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button class="btn btn-light">Create</button>
+      </form>
+    </div>
+    <div class="col-md-8">
+      {% for room in user.rooms.all %}
+        {% include 'components/_room.html' %}
+      {% empty %}
+        <p>You are not member of any room.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock content %}

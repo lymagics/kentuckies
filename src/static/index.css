@@ -1,0 +1,41 @@
+body {
+  background-color: #f37373;
+  color: #fff;
+}
+
+.App {
+  padding: 0;
+}
+
+.controls-icon {
+  width: 40px;
+  height: 40px;
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 2px;
+  margin-left: 3px;
+}
+
+.controls-icon:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.Room {
+  color: black;
+  font-size: 20px;
+}
+
+.logo {
+  height: 40px;
+  width: 40px;
+}
+
+.Avatar {
+  border: 2px solid #fff;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.Avatar img {
+  border-radius: 50%;
+}

@@ -1,0 +1,7 @@
+Django==4.1.7
+environs[django]==9.5.0
+psycopg2-binary==2.9.5
+crispy-bootstrap5==0.7
+django-braces==1.15.0
+agora-token-builder==1.0.0
+whitenoise==6.4.0

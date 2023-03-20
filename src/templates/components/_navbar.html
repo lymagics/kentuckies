@@ -1,0 +1,23 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light sticky-top" style="background-color: #ffd1d1;">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'pages:home' %}">
+      <img class="logo" src="{% static 'icons/logo.svg' %}">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        {% if user.is_authenticated %}
+          <a class="nav-link active" aria-current="page" href="{% url 'rooms:new' %}">My Rooms</a>
+        {% endif %}
+      </div>
+    </div>
+    {% if user.is_authenticated %}
+      <a href="{% url 'pages:logout' %}" class="link-dark">Logout</a>
+    {% else %}
+      <a href="{% url 'pages:login' %}" class="link-dark">Login</a>
+    {% endif %}
+  </div>
+</nav>

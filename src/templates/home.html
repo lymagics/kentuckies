@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6">
+        <div id="welcome-message"></div>
+      </div>
+      <div class="col-md-4">
+        <h4>Join room:</h4>
+        <form method="POST">
+          {% csrf_token %}
+          {{ form|crispy }}
+          <button class="btn btn-light" type="submit">Join</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block javascript %}
+  <script src="https://unpkg.com/typed.js@2.0.132/dist/typed.umd.js"></script>
+  <script>
+    const welcomeMessage = document.getElementById('welcome-message');
+    const options = {
+      strings: ['<h1>Welcome to Kentuckies!</h1> <h3>Place where you can hangout with you friends.</h3>'],
+      typeSpeed: 40,
+    };
+
+    const typed = new Typed(welcomeMessage, options);
+  </script>
+{% endblock javascript %}
